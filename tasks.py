@@ -28,7 +28,7 @@ def test(c):
     
     Zie README.md voor gedetailleerde uitleg van het proces.
     """
-    c.run("""python -c "
+    c.run(""".venv/bin/python3 -c "
 from fastmcp import FastMCP
 import asyncio
 
@@ -39,7 +39,7 @@ async def test():
     
     # Configureer hoe de server gestart moet worden
     # Dit start 'python server.py' als subprocess
-    params = StdioServerParameters(command='python', args=['server.py'])
+    params = StdioServerParameters(command='.venv/bin/python3', args=['server.py'])
     
     # Open communicatie met de server (stdio = standard in/out)
     async with stdio_client(params) as (read, write):
