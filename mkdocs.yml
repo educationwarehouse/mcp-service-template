@@ -1,0 +1,13 @@
+site_name: FastMCP Demo
+theme:
+  name: material
+  palette:
+    scheme: slate
+
+nav:
+  - Home: index.md
+  - Docker: docker.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
