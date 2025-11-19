@@ -97,3 +97,23 @@ asyncio.run(test())
 def inspect(c):
     """Toon alle beschikbare tools en hun schemas"""
     c.run("fastmcp inspect server.py")
+
+@task
+def docker_build(c):
+    """Build Docker image"""
+    c.run("docker compose build")
+
+@task
+def docker_up(c):
+    """Start Docker container"""
+    c.run("docker compose up -d")
+
+@task
+def docker_down(c):
+    """Stop Docker container"""
+    c.run("docker compose down")
+
+@task
+def docker_logs(c):
+    """Show Docker logs"""
+    c.run("docker compose logs -f")
