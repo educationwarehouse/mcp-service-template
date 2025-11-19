@@ -25,11 +25,31 @@ Deze demo bevat een simpele calculator met 3 tools:
 
 ## Installatie
 
+### Stap 1: Virtual Environment aanmaken
+
+```bash
+inv venv
+```
+
+Dit maakt een `.venv` directory aan met een geïsoleerde Python omgeving.
+
+**Waarom een virtual environment?**
+- Dependencies blijven gescheiden van je systeem Python
+- Geen conflicten met andere projecten
+- Makkelijk te verwijderen (delete gewoon `.venv/`)
+
+### Stap 2: Dependencies installeren
+
 ```bash
 inv install
 ```
 
-Dit installeert FastMCP en alle dependencies.
+Dit installeert FastMCP en alle dependencies in de venv.
+
+**Technische achtergrond:**
+- De tasks gebruiken automatisch `.venv/bin/python3` als die bestaat
+- Anders valt het terug naar systeem `python3`
+- Dit zorgt ervoor dat alle tools in de juiste omgeving draaien
 
 ## Gebruik
 

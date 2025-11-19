@@ -1,19 +1,37 @@
 from invoke import task
+import os
+
+def get_python():
+    """Return juiste Python executable (venv of system)"""
+    venv_python = ".venv/bin/python3"
+    return venv_python if os.path.exists(venv_python) else "python3"
+
+@task
+def venv(c):
+    """Maak virtual environment aan met uv"""
+    c.run("uv venv")
+    print("\n✅ Venv aangemaakt! Installeer nu dependencies met: inv install")
 
 @task
 def install(c):
-    """Installeer fastmcp"""
-    c.run("pip install fastmcp")
+    """Installeer fastmcp in venv (maak eerst venv met: inv venv)"""
+    python = get_python()
+    if python == "python3":
+        print("⚠️  Geen venv gevonden. Run eerst: inv venv")
+        return
+    c.run("uv pip install fastmcp")
 
 @task
 def start(c):
     """Start server"""
-    c.run("fastmcp run server.py")
+    python = get_python()
+    c.run(f"{python} -m fastmcp run server.py")
 
 @task
 def dev(c):
     """Start in dev mode"""
-    c.run("fastmcp dev server.py")
+    python = get_python()
+    c.run(f"{python} -m fastmcp dev server.py")
 
 @task
 def test(c):
@@ -28,7 +46,8 @@ def test(c):
     
     Zie README.md voor gedetailleerde uitleg van het proces.
     """
-    c.run(""".venv/bin/python3 -c "
+    python = get_python()
+    test_code = """
 from fastmcp import FastMCP
 import asyncio
 
@@ -39,7 +58,7 @@ async def test():
     
     # Configureer hoe de server gestart moet worden
     # Dit start 'python server.py' als subprocess
-    params = StdioServerParameters(command='.venv/bin/python3', args=['server.py'])
+    params = StdioServerParameters(command='""" + python + """', args=['server.py'])
     
     # Open communicatie met de server (stdio = standard in/out)
     async with stdio_client(params) as (read, write):
@@ -71,8 +90,8 @@ async def test():
             print('\\n✅ Alle tests geslaagd!')
 
 asyncio.run(test())
-"
-""")
+"""
+    c.run(f'{python} -c "{test_code}"')
 
 @task
 def inspect(c):
