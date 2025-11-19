@@ -1,4 +1,6 @@
-from invoke import task
+from invoke import Context
+from edwh import improved_task
+from edwh.tasks import check_env, generate_password
 import os
 
 def get_python():
@@ -6,35 +8,62 @@ def get_python():
     venv_python = ".venv/bin/python3"
     return venv_python if os.path.exists(venv_python) else "python3"
 
-@task
-def venv(c):
+@improved_task
+def setup(c: Context):
+    """Configure .env file met PROJECT en HOSTINGDOMAIN"""
+    project = check_env(
+        "PROJECT",
+        default="mcp-server",
+        comment="Project naam voor Docker container en Traefik routing",
+    )
+    assert project.strip() and project.replace('-', '').replace('_', '').isalnum(), \
+        "PROJECT moet alfanumeriek zijn (- en _ toegestaan)"
+    
+    domain = check_env(
+        "HOSTINGDOMAIN", 
+        default="localhost",
+        comment="Domain voor Traefik routing (bijv. example.com)",
+    )
+    assert domain.strip(), "HOSTINGDOMAIN mag niet leeg zijn"
+    
+    print(f"✅ Setup compleet: {project}.{domain}")
+
+
+@improved_task
+def venv(c: Context):
     """Maak virtual environment aan met uv"""
     c.run("uv venv")
     print("\n✅ Venv aangemaakt! Installeer nu dependencies met: inv install")
 
-@task
-def install(c):
-    """Installeer fastmcp in venv (maak eerst venv met: inv venv)"""
+@improved_task
+def install(c: Context):
+    """Installeer fastmcp + mkdocs in venv (maak eerst venv met: inv venv)"""
     python = get_python()
     if python == "python3":
         print("⚠️  Geen venv gevonden. Run eerst: inv venv")
         return
-    c.run("uv pip install fastmcp")
+    c.run("uv pip install fastmcp mkdocs-material")
 
-@task
-def start(c):
+@improved_task
+def docs(c: Context):
+    """Serve mkdocs documentation"""
+    python = get_python()
+    c.run(f"{python} -m mkdocs serve")
+
+@improved_task
+def start(c: Context):
     """Start server"""
     python = get_python()
     c.run(f"{python} -m fastmcp run server.py")
 
-@task
-def dev(c):
+@improved_task
+def dev(c: Context):
     """Start in dev mode"""
     python = get_python()
     c.run(f"{python} -m fastmcp dev server.py")
 
-@task
-def test(c):
+@improved_task
+def test(c: Context):
     """
     Test alle MCP tools via een programmatische client.
     
@@ -93,27 +122,27 @@ asyncio.run(test())
 """
     c.run(f'{python} -c "{test_code}"')
 
-@task
-def inspect(c):
+@improved_task
+def inspect(c: Context):
     """Toon alle beschikbare tools en hun schemas"""
     c.run("fastmcp inspect server.py")
 
-@task
-def docker_build(c):
+@improved_task
+def docker_build(c: Context):
     """Build Docker image"""
     c.run("docker compose build")
 
-@task
-def docker_up(c):
+@improved_task
+def docker_up(c: Context):
     """Start Docker container"""
     c.run("docker compose up -d")
 
-@task
-def docker_down(c):
+@improved_task
+def docker_down(c: Context):
     """Stop Docker container"""
     c.run("docker compose down")
 
-@task
-def docker_logs(c):
+@improved_task
+def docker_logs(c: Context):
     """Show Docker logs"""
     c.run("docker compose logs -f")
